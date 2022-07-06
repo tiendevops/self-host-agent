@@ -7,7 +7,7 @@ on:
 
 jobs:
   devops:
-    runs-on: test
+    runs-on: self-hosted
     steps: 
       - name: Checkout code
         uses: actions/checkout@v2
