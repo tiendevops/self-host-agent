@@ -1,0 +1,19 @@
+name: ci
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  devops:
+    runs-on: test
+    steps: 
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: main
+      
+      - name: Test Ansible
+        run: ansible --version
+
