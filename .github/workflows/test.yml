@@ -6,8 +6,8 @@ on:
     - main
 
 jobs:
-  devops:
-    runs-on: self-hosted
+  devops-test:
+    runs-on: [self-hosted,test]
     steps: 
       - name: Checkout code
         uses: actions/checkout@v2
