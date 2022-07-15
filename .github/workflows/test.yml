@@ -1,4 +1,5 @@
-name: Manually triggered workflow
+name: CloudOps-CTPP
+
 on:
   workflow_dispatch:
     inputs:
@@ -7,38 +8,65 @@ on:
         required: true
         type: choice
         options:
+        - all-jobs
         - prometheus-federation
-        - haproxy-int-lb'
+        - haproxy-int-lb
+        - alert-manager-setup
+        - prometheus-ctpp
+
+runs-on: ubuntu-latest
+
+env:
+  INVENTORY: ./inventory/skt-ctpp-monitoring.ini
+  PLAYBOOK: cloudops-ctpp.yaml
+  PROM_FED_TAG: gather-facts, prometheus-federation-server
+  HAPROXY_TAG: haproxy-int-lb
+  ALERTMANAGER_TAG: alert-manager-setup
+  PROM_TAG: gather-facts, prometheus-ctpp
+
+
+.checkout_code: &checkout_code
+  - name: Checkout code
+    uses: actions/checkout@v2
+
+  - name: install ansible package
+    run: |-
+      sudo apt install --no-install-recommends python-netaddr -y
+      pip3 install netaddr
 
 jobs:
   prometheus-federation:
     name: Setup prometheus-federation server
-    runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.job == 'prometheus-federation'}}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: install ansible package
-        run: |-
-          sudo apt install --no-install-recommends python-netaddr -y
-          pip3 install netaddr
-
+    if: ${{ github.event.inputs.job }} == {{ github.job }}
+    steps: 
+      <<: *checkout_code  
+      
       - name: Run Ansible command
-        run: ansible-playbook -i ./inventory/skt-ctpp-monitoring.ini cloudops-ctpp.yaml --tag prometheus-federation-server
+        run: ansible-playbook -i $INVENTORY $PLAYBOOK --tag "$PROM_FED_TAG"
 
   haproxy-int-lb:
-    name: Deploy haproxy
-    runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.job == 'haproxy-int-lb'}}
+    name: Setup haproxy internal
+    if: ${{ github.event.inputs.job }} == {{ github.job }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      <<: *checkout_code  
+      
+      - name: Run Ansible command
+        run: ansible-playbook -i $INVENTORY $PLAYBOOK --tag $HAPROXY_TAG
 
-      - name: install ansible package
-        run: |-
-          sudo apt install --no-install-recommends python-netaddr -y
-          pip3 install netaddr
+  alert-manager-setup:
+    name: Setup Alert Manager
+    if: ${{ github.event.inputs.job }} == {{ github.job }}
+    steps:
+      <<: *checkout_code  
 
       - name: Run Ansible command
-        run: ansible-playbook -i ./inventory/skt-ctpp-monitoring.ini cloudops-ctpp.yaml --tag haproxy-int-lb
+        run: ansible-playbook -i $INVENTORY $PLAYBOOK --tag $ALERTMANAGER_TAG
+
+  prometheus-ctpp:
+    name: Setup prometheus ctpp
+    if: ${{ github.event.inputs.job }} == {{ github.job }}
+    steps:
+      <<: *checkout_code  
+
+      - name: Run Ansible command
+        run: ansible-playbook -i $INVENTORY $PLAYBOOK --tag "$PROM_TAG"
