@@ -1,19 +1,40 @@
-name: ci
-
+name: Manually triggered workflow
 on:
-  push:
-    branches:
-    - main
+  workflow_dispatch:
+    inputs:
+      job:
+        description: 'Job to run.'
+        required: true
 
 jobs:
-  devops-test:
-    runs-on: [self-hosted,test]
-    steps: 
+  prometheus-federation:
+    name: Setup prometheus-federation server
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.job == 'prometheus-federation'}}
+    steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        with:
-          ref: main
-      
-      - name: Test Ansible
-        run: ansible --version
 
+      - name: install ansible package
+        run: |-
+          sudo apt install --no-install-recommends python-netaddr -y
+          pip3 install netaddr
+
+      - name: Run Ansible command
+        run: ansible-playbook -i ./inventory/skt-ctpp-monitoring.ini cloudops-ctpp.yaml --tag prometheus-federation-server
+
+  haproxy-int-lb:
+    name: Deploy haproxy
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.job == 'haproxy-int-lb'}}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: install ansible package
+        run: |-
+          sudo apt install --no-install-recommends python-netaddr -y
+          pip3 install netaddr
+
+      - name: Run Ansible command
+        run: ansible-playbook -i ./inventory/skt-ctpp-monitoring.ini cloudops-ctpp.yaml --tag haproxy-int-lb
