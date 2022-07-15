@@ -25,21 +25,18 @@ env:
   PROM_TAG: gather-facts, prometheus-ctpp
 
 
-.checkout_code: &checkout_code
-  - name: Checkout code
-    uses: actions/checkout@v2
-
-  - name: install ansible package
-    run: |-
-      sudo apt install --no-install-recommends python-netaddr -y
-      pip3 install netaddr
-
 jobs:
   prometheus-federation:
     name: Setup prometheus-federation server
     if: ${{ github.event.inputs.job }} == {{ github.job }}
     steps: 
-      <<: *checkout_code  
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: install ansible package
+        run: |-
+          sudo apt install --no-install-recommends python-netaddr -y
+          pip3 install netaddr     
       
       - name: Run Ansible command
         run: ansible-playbook -i $INVENTORY $PLAYBOOK --tag "$PROM_FED_TAG"
@@ -48,7 +45,13 @@ jobs:
     name: Setup haproxy internal
     if: ${{ github.event.inputs.job }} == {{ github.job }}
     steps:
-      <<: *checkout_code  
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: install ansible package
+        run: |-
+          sudo apt install --no-install-recommends python-netaddr -y
+          pip3 install netaddr
       
       - name: Run Ansible command
         run: ansible-playbook -i $INVENTORY $PLAYBOOK --tag $HAPROXY_TAG
@@ -57,7 +60,13 @@ jobs:
     name: Setup Alert Manager
     if: ${{ github.event.inputs.job }} == {{ github.job }}
     steps:
-      <<: *checkout_code  
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: install ansible package
+        run: |-
+          sudo apt install --no-install-recommends python-netaddr -y
+          pip3 install netaddr
 
       - name: Run Ansible command
         run: ansible-playbook -i $INVENTORY $PLAYBOOK --tag $ALERTMANAGER_TAG
@@ -66,7 +75,13 @@ jobs:
     name: Setup prometheus ctpp
     if: ${{ github.event.inputs.job }} == {{ github.job }}
     steps:
-      <<: *checkout_code  
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: install ansible package
+        run: |-
+          sudo apt install --no-install-recommends python-netaddr -y
+          pip3 install netaddr
 
       - name: Run Ansible command
         run: ansible-playbook -i $INVENTORY $PLAYBOOK --tag "$PROM_TAG"
