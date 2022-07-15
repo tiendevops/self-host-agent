@@ -14,7 +14,6 @@ on:
         - alert-manager-setup
         - prometheus-ctpp
 
-runs-on: ubuntu-latest
 
 env:
   INVENTORY: ./inventory/skt-ctpp-monitoring.ini
@@ -27,6 +26,7 @@ env:
 
 jobs:
   prometheus-federation:
+    runs-on: ubuntu-latest
     name: Setup prometheus-federation server
     if: ${{ github.event.inputs.job }} == {{ github.job }}
     steps: 
@@ -42,6 +42,7 @@ jobs:
         run: ansible-playbook -i $INVENTORY $PLAYBOOK --tag "$PROM_FED_TAG"
 
   haproxy-int-lb:
+    runs-on: ubuntu-latest
     name: Setup haproxy internal
     if: ${{ github.event.inputs.job }} == {{ github.job }}
     steps:
@@ -57,6 +58,7 @@ jobs:
         run: ansible-playbook -i $INVENTORY $PLAYBOOK --tag $HAPROXY_TAG
 
   alert-manager-setup:
+    runs-on: ubuntu-latest
     name: Setup Alert Manager
     if: ${{ github.event.inputs.job }} == {{ github.job }}
     steps:
@@ -72,6 +74,7 @@ jobs:
         run: ansible-playbook -i $INVENTORY $PLAYBOOK --tag $ALERTMANAGER_TAG
 
   prometheus-ctpp:
+    runs-on: ubuntu-latest
     name: Setup prometheus ctpp
     if: ${{ github.event.inputs.job }} == {{ github.job }}
     steps:
