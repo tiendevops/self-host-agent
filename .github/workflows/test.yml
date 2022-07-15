@@ -5,6 +5,10 @@ on:
       job:
         description: 'Job to run.'
         required: true
+        type: choice
+        options:
+        - prometheus-federation
+        - haproxy-int-lb'
 
 jobs:
   prometheus-federation:
